@@ -1,6 +1,7 @@
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 export interface Product {
   id: string;
@@ -15,9 +16,10 @@ export interface Product {
 
 interface ProductCardProps {
   product: Product;
+  index?: number;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-PE", {
       style: "currency",
@@ -26,7 +28,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-border group">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      whileHover={{ y: -5 }}
+      className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 border border-border group"
+    >
       {/* Image */}
       <div className="aspect-square bg-muted relative overflow-hidden">
         {product.image ? (
@@ -93,7 +101,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           Agregar al Carrito
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
