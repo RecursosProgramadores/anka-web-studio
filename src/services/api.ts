@@ -26,6 +26,36 @@ export interface ApiProduct {
   }[];
 }
 
+export interface ApiAd {
+  id: string;
+  titulo: string;
+  url: string;
+  estado: boolean;
+  imagen_relacionada: {
+    id: string;
+    url: string;
+    orden: number;
+    entidad_tipo: string;
+  };
+}
+
+export interface ApiPaymentMethod {
+  id: string;
+  nombre_banco: string;
+  descripcion: string;
+  numero_cuenta: string | null;
+  nombre_cuenta: string | null;
+  ruc: string | null;
+  tipo: string;
+  estado: boolean;
+  imagen_relacionada: {
+    id: string;
+    url: string;
+    orden: number;
+    entidad_tipo: string;
+  } | null;
+}
+
 export interface ApiResponse<T> {
   status: boolean;
   result: T;
@@ -50,6 +80,20 @@ export const api = {
     const response = await fetch(`${BASE_URL}/productos/${slug}/empresa/${EMPRESA_SLUG}`);
     if (!response.ok) throw new Error("Failed to fetch product");
     const data: ApiResponse<ApiProduct> = await response.json();
+    return data.result;
+  },
+
+  async getAds(): Promise<ApiAd[]> {
+    const response = await fetch(`${BASE_URL}/anuncios/empresa/${EMPRESA_SLUG}`);
+    if (!response.ok) throw new Error("Failed to fetch ads");
+    const data: ApiResponse<ApiAd[]> = await response.json();
+    return data.result;
+  },
+
+  async getPaymentMethods(): Promise<ApiPaymentMethod[]> {
+    const response = await fetch(`${BASE_URL}/metodos-pago/empresa/${EMPRESA_SLUG}`);
+    if (!response.ok) throw new Error("Failed to fetch payment methods");
+    const data: ApiResponse<ApiPaymentMethod[]> = await response.json();
     return data.result;
   }
 };
