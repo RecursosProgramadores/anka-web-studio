@@ -1,5 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ShoppingBag, CreditCard, ChevronRight, Tag } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
+import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
 
 interface ProductFiltersProps {
   categories: string[];
@@ -16,60 +20,116 @@ const ProductFilters = ({
   priceFilter,
   onPriceFilterChange,
 }: ProductFiltersProps) => {
+  const { totalPrice, totalItems } = useCart();
+  const navigate = useNavigate();
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("es-PE", {
+      style: "currency",
+      currency: "PEN",
+    }).format(price);
+  };
+
   return (
-    <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-      {/* Categories */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-foreground mb-3">Categorías</h3>
-        <div className="flex flex-wrap gap-2">
-          <Badge
-            variant={selectedCategory === null ? "default" : "secondary"}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => onCategoryChange(null)}
-          >
-            Todos
-          </Badge>
-          {categories.map((category) => (
-            <Badge
-              key={category}
-              variant={selectedCategory === category ? "default" : "secondary"}
-              className="cursor-pointer hover:opacity-80 transition-opacity capitalize"
-              onClick={() => onCategoryChange(category)}
-            >
-              {category}
-            </Badge>
-          ))}
+    <div className="flex flex-col gap-6">
+      {/* Mi Pedido Summary */}
+      <div className="bg-primary text-primary-foreground rounded-2xl p-6 shadow-xl shadow-primary/20 overflow-hidden relative group">
+        <div className="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+          <ShoppingBag className="w-24 h-24" />
         </div>
+
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-4 opacity-80 flex items-center gap-2">
+          <Tag className="w-3 h-3" />
+          Mi Pedido
+        </h3>
+
+        <div className="space-y-1">
+          <p className="text-3xl font-black">{formatPrice(totalPrice)}</p>
+          <p className="text-xs font-medium opacity-80">
+            {totalItems} productos seleccionado(s)
+          </p>
+        </div>
+
+        <Separator className="my-4 bg-primary-foreground/20" />
+
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full font-black text-xs uppercase tracking-widest h-10 group"
+          onClick={() => navigate("/checkout")}
+        >
+          Confirmar Pedido
+          <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+        </Button>
       </div>
 
-      {/* Price Type Filter */}
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Tipo de Venta</h3>
-        <div className="flex flex-col gap-2">
-          <Button
-            variant={priceFilter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPriceFilterChange("all")}
-            className="justify-start"
-          >
-            Ver Todos
-          </Button>
-          <Button
-            variant={priceFilter === "retail" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPriceFilterChange("retail")}
-            className="justify-start"
-          >
-            Precio al Menor
-          </Button>
-          <Button
-            variant={priceFilter === "wholesale" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPriceFilterChange("wholesale")}
-            className="justify-start"
-          >
-            Precio al Mayor
-          </Button>
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* Categories */}
+        <div className="mb-8">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">
+            Categorías
+          </h3>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={() => onCategoryChange(null)}
+              className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedCategory === null
+                ? "bg-primary/10 text-primary border-r-4 border-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`}
+            >
+              <span>Todos los productos</span>
+              {selectedCategory === null && <ChevronRight className="w-4 h-4" />}
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => onCategoryChange(category)}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold capitalize transition-all ${selectedCategory === category
+                  ? "bg-primary/10 text-primary border-r-4 border-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  }`}
+              >
+                <span>{category}</span>
+                {selectedCategory === category && <ChevronRight className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Type Filter */}
+        <div>
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">
+            Tipo de Venta
+          </h3>
+          <div className="grid grid-cols-1 gap-2">
+            <Button
+              variant={priceFilter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPriceFilterChange("all")}
+              className={`justify-start h-10 font-bold ${priceFilter === "all" ? "shadow-md shadow-primary/20" : ""}`}
+            >
+              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
+              Ver Todos
+            </Button>
+            <Button
+              variant={priceFilter === "retail" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPriceFilterChange("retail")}
+              className={`justify-start h-10 font-bold ${priceFilter === "retail" ? "shadow-md shadow-primary/20" : ""}`}
+            >
+              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
+              Precio al Menor
+            </Button>
+            <Button
+              variant={priceFilter === "wholesale" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPriceFilterChange("wholesale")}
+              className={`justify-start h-10 font-bold ${priceFilter === "wholesale" ? "shadow-md shadow-primary/20" : ""}`}
+            >
+              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
+              Precio al Mayor
+            </Button>
+          </div>
         </div>
       </div>
     </div>

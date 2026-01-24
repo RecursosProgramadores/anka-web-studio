@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Productos = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { products, categories, isLoading, error } = useProducts();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get("categoria")
@@ -33,13 +33,18 @@ const Productos = () => {
       const matchesSearch =
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesCategory = 
+
+      const matchesCategory =
         !selectedCategory || product.category === selectedCategory;
-      
-      return matchesSearch && matchesCategory;
+
+      const matchesPrice =
+        priceFilter === "all" ||
+        (priceFilter === "retail" && product.price > 0) ||
+        (priceFilter === "wholesale" && product.wholesalePrice !== undefined);
+
+      return matchesSearch && matchesCategory && matchesPrice;
     });
-  }, [products, searchQuery, selectedCategory]);
+  }, [products, searchQuery, selectedCategory, priceFilter]);
 
   return (
     <Layout>
@@ -51,7 +56,7 @@ const Productos = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
-              Explora nuestra variedad de productos importados y nacionales 
+              Explora nuestra variedad de productos importados y nacionales
               disponibles al por mayor y menor.
             </p>
           </FadeIn>
@@ -122,8 +127,8 @@ const Productos = () => {
                       </p>
                     </div>
                   </FadeIn>
-                  
-                  <motion.div 
+
+                  <motion.div
                     layout
                     className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6"
                   >
@@ -149,7 +154,7 @@ const Productos = () => {
                 💡 Integración con API
               </h3>
               <p className="text-muted-foreground text-sm">
-                Los productos se cargan dinámicamente. Para agregar nuevos productos, 
+                Los productos se cargan dinámicamente. Para agregar nuevos productos,
                 utiliza el panel de administración que se conecta con nuestra API.
               </p>
             </div>

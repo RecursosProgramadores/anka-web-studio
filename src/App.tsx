@@ -7,26 +7,34 @@ import Index from "./pages/Index";
 import Nosotros from "./pages/Nosotros";
 import Productos from "./pages/Productos";
 import Contacto from "./pages/Contacto";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
+
+import { CartProvider } from "@/context/CartContext";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/nosotros" element={<Nosotros />} />
-          <Route path="/productos" element={<Productos />} />
-          <Route path="/contacto" element={<Contacto />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <CartProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/nosotros" element={<Nosotros />} />
+            <Route path="/productos" element={<Productos />} />
+            <Route path="/contacto" element={<Contacto />} />
+            <Route path="/checkout" element={<Checkout />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </CartProvider>
   </QueryClientProvider>
 );
 
