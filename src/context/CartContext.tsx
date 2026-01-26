@@ -3,15 +3,15 @@ import { Product } from "@/components/products/ProductCard";
 
 export interface CartItem extends Product {
     quantity: number;
-    selectedPriceType: "retail" | "wholesale";
+    selectedPresentation: string;
     selectedPrice: number;
 }
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product, quantity: number, priceType: "retail" | "wholesale") => void;
-    removeFromCart: (productId: string, priceType: "retail" | "wholesale") => void;
-    updateQuantity: (productId: string, priceType: "retail" | "wholesale", quantity: number) => void;
+    addToCart: (product: Product, quantity: number, presentation: string, price: number) => void;
+    removeFromCart: (productId: string, presentation: string) => void;
+    updateQuantity: (productId: string, presentation: string, quantity: number) => void;
     clearCart: () => void;
     totalItems: number;
     totalPrice: number;
@@ -43,11 +43,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         window.dispatchEvent(new Event("cart-updated"));
     }, [items]);
 
-    const addToCart = (product: Product, quantity: number, priceType: "retail" | "wholesale") => {
+    const addToCart = (product: Product, quantity: number, presentation: string, price: number) => {
         setItems((prevItems) => {
-            const price = priceType === "retail" ? product.price : (product.wholesalePrice || product.price);
             const existingItemIndex = prevItems.findIndex(
-                (item) => item.id === product.id && item.selectedPriceType === priceType
+                (item) => item.id === product.id && item.selectedPresentation === presentation
             );
 
             if (existingItemIndex > -1) {
@@ -56,21 +55,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 return newItems;
             }
 
-            return [...prevItems, { ...product, quantity, selectedPriceType: priceType, selectedPrice: price }];
+            return [...prevItems, { ...product, quantity, selectedPresentation: presentation, selectedPrice: price }];
         });
     };
 
-    const removeFromCart = (productId: string, priceType: "retail" | "wholesale") => {
+    const removeFromCart = (productId: string, presentation: string) => {
         setItems((prevItems) =>
-            prevItems.filter((item) => !(item.id === productId && item.selectedPriceType === priceType))
+            prevItems.filter((item) => !(item.id === productId && item.selectedPresentation === presentation))
         );
     };
 
-    const updateQuantity = (productId: string, priceType: "retail" | "wholesale", quantity: number) => {
+    const updateQuantity = (productId: string, presentation: string, quantity: number) => {
         if (quantity < 1) return;
         setItems((prevItems) =>
             prevItems.map((item) =>
-                item.id === productId && item.selectedPriceType === priceType
+                item.id === productId && item.selectedPresentation === presentation
                     ? { ...item, quantity }
                     : item
             )

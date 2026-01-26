@@ -17,7 +17,6 @@ const Productos = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get("categoria")
   );
-  const [priceFilter, setPriceFilter] = useState<"all" | "retail" | "wholesale">("all");
 
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
@@ -37,14 +36,9 @@ const Productos = () => {
       const matchesCategory =
         !selectedCategory || product.category === selectedCategory;
 
-      const matchesPrice =
-        priceFilter === "all" ||
-        (priceFilter === "retail" && product.price > 0) ||
-        (priceFilter === "wholesale" && product.wholesalePrice !== undefined);
-
-      return matchesSearch && matchesCategory && matchesPrice;
+      return matchesSearch && matchesCategory;
     });
-  }, [products, searchQuery, selectedCategory, priceFilter]);
+  }, [products, searchQuery, selectedCategory]);
 
   return (
     <Layout>
@@ -88,8 +82,6 @@ const Productos = () => {
                     categories={categories}
                     selectedCategory={selectedCategory}
                     onCategoryChange={handleCategoryChange}
-                    priceFilter={priceFilter}
-                    onPriceFilterChange={setPriceFilter}
                   />
                 </div>
               </SlideIn>
@@ -99,21 +91,22 @@ const Productos = () => {
             <div className="lg:col-span-3">
               {isLoading ? (
                 <FadeIn>
-                  <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Cargando productos...</span>
+                  <div className="flex flex-col items-center justify-center py-20 bg-card rounded-2xl border border-dashed">
+                    <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+                    <span className="text-muted-foreground font-medium text-lg">Cargando catálogo...</span>
                   </div>
                 </FadeIn>
               ) : error ? (
                 <FadeIn>
-                  <div className="text-center py-20">
-                    <p className="text-destructive">{error}</p>
+                  <div className="text-center py-20 bg-card rounded-2xl border border-destructive/20 text-destructive">
+                    <p className="font-bold text-xl mb-2">Oops!</p>
+                    <p>{error}</p>
                   </div>
                 </FadeIn>
               ) : filteredProducts.length === 0 ? (
                 <FadeIn>
-                  <div className="text-center py-20">
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-20 bg-card rounded-2xl border border-dashed">
+                    <p className="text-muted-foreground text-lg">
                       No se encontraron productos que coincidan con tu búsqueda.
                     </p>
                   </div>
@@ -122,15 +115,15 @@ const Productos = () => {
                 <>
                   <FadeIn>
                     <div className="flex items-center justify-between mb-6">
-                      <p className="text-muted-foreground">
-                        Mostrando {filteredProducts.length} producto(s)
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Mostrando <span className="text-foreground font-bold">{filteredProducts.length}</span> producto(s)
                       </p>
                     </div>
                   </FadeIn>
 
                   <motion.div
                     layout
-                    className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
                   >
                     <AnimatePresence mode="popLayout">
                       {filteredProducts.map((product, index) => (

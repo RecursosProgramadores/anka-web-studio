@@ -18,11 +18,17 @@ export interface ApiProduct {
   precio: number;
   precio_falso: number | null;
   estado: boolean;
+  categoria_id: string;
   categoria: ApiCategory;
   imagenes_relacionadas: {
     id: string;
     url: string;
     orden: number;
+  }[];
+  variantes: {
+    id: string;
+    presentacion: string;
+    precio: number;
   }[];
 }
 

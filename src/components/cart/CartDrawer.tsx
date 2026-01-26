@@ -61,7 +61,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                         <ScrollArea className="flex-1 p-6">
                             <div className="space-y-6">
                                 {items.map((item) => (
-                                    <div key={`${item.id}-${item.selectedPriceType}`} className="flex gap-4">
+                                    <div key={`${item.id}-${item.selectedPresentation}`} className="flex gap-4">
                                         <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                                             {item.image ? (
                                                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -75,12 +75,12 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                                             <div className="flex items-start justify-between gap-2">
                                                 <div>
                                                     <h4 className="text-sm font-bold line-clamp-1">{item.name}</h4>
-                                                    <span className="text-[10px] font-bold uppercase text-primary tracking-wider">
-                                                        Venta al {item.selectedPriceType === "retail" ? "Menor" : "Mayor"}
-                                                    </span>
+                                                    <div className="mt-0.5 inline-block bg-primary/10 text-primary text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                                        {item.selectedPresentation}
+                                                    </div>
                                                 </div>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id, item.selectedPriceType)}
+                                                    onClick={() => removeFromCart(item.id, item.selectedPresentation)}
                                                     className="text-muted-foreground hover:text-destructive transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -93,7 +93,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-6 w-6"
-                                                        onClick={() => updateQuantity(item.id, item.selectedPriceType, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.id, item.selectedPresentation, item.quantity - 1)}
                                                     >
                                                         <Minus className="w-3 h-3" />
                                                     </Button>
@@ -102,7 +102,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-6 w-6"
-                                                        onClick={() => updateQuantity(item.id, item.selectedPriceType, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.id, item.selectedPresentation, item.quantity + 1)}
                                                     >
                                                         <Plus className="w-3 h-3" />
                                                     </Button>

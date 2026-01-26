@@ -18,7 +18,15 @@ interface ProductDetailProps {
 }
 
 const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
-    const [selectedType, setSelectedType] = useState<"retail" | "wholesale">("retail");
+    // Create a normalized list of variants that includes the base price as "Unidad" if it's not already there
+    const allVariants = [
+        { id: "base", presentacion: "Unidad", precio: product.price },
+        ...(product.variants || [])
+    ].filter((v, i, self) =>
+        i === self.findIndex((t) => t.presentacion.toLowerCase() === v.presentacion.toLowerCase())
+    );
+
+    const [selectedVariant, setSelectedVariant] = useState(allVariants[0]);
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
 
@@ -29,12 +37,10 @@ const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
         }).format(price);
     };
 
-    const currentPrice = selectedType === "retail" ? product.price : (product.wholesalePrice || product.price);
-
     const handleAddToCart = () => {
-        addToCart(product, quantity, selectedType);
+        addToCart(product, quantity, selectedVariant.presentacion, selectedVariant.precio);
         toast.success(`Producto añadido`, {
-            description: `${product.name} (${quantity} uni.)`,
+            description: `${product.name} - ${selectedVariant.presentacion} (${quantity} uni.)`,
             icon: <ShoppingCart className="w-4 h-4 text-primary" />,
         });
         onOpenChange(false);
@@ -63,9 +69,9 @@ const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
                                 <Badge variant="secondary" className="bg-background/90 hover:bg-background/90 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border-none shadow-sm text-foreground">
                                     {product.category}
                                 </Badge>
-                                {product.wholesalePrice && (
-                                    <Badge className="bg-primary hover:bg-primary text-primary-foreground border-none shadow-sm text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
-                                        Mayorista
+                                {product.fakePrice && product.fakePrice > selectedVariant.precio && (
+                                    <Badge className="bg-green-500 hover:bg-green-500 text-white border-none shadow-sm text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
+                                        Oferta
                                     </Badge>
                                 )}
                             </div>
@@ -99,6 +105,17 @@ const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
                                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground leading-tight">
                                     {product.name}
                                 </h2>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl font-black text-primary">
+                                        {formatPrice(selectedVariant.precio)}
+                                    </span>
+                                    {/* Mostrar precio tachado solo si se selecciona la unidad base y existe un precio_falso mayor */}
+                                    {selectedVariant.presentacion.toLowerCase() === "unidad" && product.fakePrice && product.fakePrice > selectedVariant.precio && (
+                                        <span className="text-sm text-muted-foreground line-through opacity-70">
+                                            {formatPrice(product.fakePrice)}
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-xs text-muted-foreground leading-relaxed font-medium line-clamp-3">
                                     {product.description || "Este producto es parte de nuestra selecta línea de importaciones. Calidad y durabilidad garantizada para potenciar tu negocio."}
                                 </p>
@@ -108,43 +125,26 @@ const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
 
                             {/* Selection Logic */}
                             <div className="space-y-4">
-                                <h4 className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">Selecciona modalidad</h4>
+                                <h4 className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">Selecciona presentación</h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <button
-                                        onClick={() => setSelectedType("retail")}
-                                        className={`flex flex-col p-4 rounded-xl border-2 transition-all duration-200 text-left ${selectedType === "retail"
-                                            ? "border-primary bg-primary/5 shadow-sm"
-                                            : "border-border hover:border-primary/20 hover:bg-accent/5"
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[9px] font-bold uppercase opacity-60">Al Menor</span>
-                                            {selectedType === "retail" && <Check className="w-3 h-3 text-primary stroke-[3]" />}
-                                        </div>
-                                        <span className="text-lg font-bold tracking-tight">{formatPrice(product.price)}</span>
-                                    </button>
-
-                                    {product.wholesalePrice ? (
+                                    {allVariants.map((variant) => (
                                         <button
-                                            onClick={() => setSelectedType("wholesale")}
-                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all duration-200 text-left relative overflow-hidden ${selectedType === "wholesale"
+                                            key={variant.id}
+                                            onClick={() => setSelectedVariant(variant)}
+                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all duration-200 text-left relative overflow-hidden ${selectedVariant.id === variant.id
                                                 ? "border-primary bg-primary/5 shadow-sm"
                                                 : "border-border hover:border-primary/20 hover:bg-accent/5"
                                                 }`}
                                         >
-                                            <div className="flex items-center justify-between mb-1 text-left">
-                                                <span className="text-[9px] font-bold uppercase opacity-60">Al Mayor</span>
-                                                {selectedType === "wholesale" && <Check className="w-3 h-3 text-primary stroke-[3]" />}
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-[9px] font-bold uppercase opacity-60 tracking-wider">
+                                                    {variant.presentacion}
+                                                </span>
+                                                {selectedVariant.id === variant.id && <Check className="w-3 h-3 text-primary stroke-[3]" />}
                                             </div>
-                                            <span className="text-lg font-bold tracking-tight">{formatPrice(product.wholesalePrice)}</span>
-                                            <Badge className="absolute -right-6 -top-1 bg-green-500 hover:bg-green-500 text-[7px] rotate-45 px-6 pt-2 h-5 font-black lowercase tracking-tighter">ahorro</Badge>
+                                            <span className="text-lg font-bold tracking-tight">{formatPrice(variant.precio)}</span>
                                         </button>
-                                    ) : (
-                                        <div className="p-4 rounded-xl border-2 border-dashed border-muted bg-muted/10 opacity-40 cursor-not-allowed">
-                                            <span className="block text-[9px] font-bold uppercase opacity-40 mb-1">Al Mayor</span>
-                                            <span className="text-xs font-semibold italic opacity-30">No disponible</span>
-                                        </div>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
 
@@ -175,7 +175,7 @@ const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
                                 <div className="text-right flex flex-col justify-center sm:border-l border-border/20 sm:pl-6 w-full sm:w-auto">
                                     <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Total Estimado</p>
                                     <p className="text-2xl font-bold text-primary tracking-tight">
-                                        {formatPrice(currentPrice * quantity)}
+                                        {formatPrice(selectedVariant.precio * quantity)}
                                     </p>
                                 </div>
                             </div>

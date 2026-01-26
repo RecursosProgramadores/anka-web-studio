@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Facebook, MapPin, Phone, Mail } from "lucide-react";
 import logo from "@/assets/logocomanka.jpg";
+import libroReclamaciones from "@/assets/libroreclamaciones.jpeg";
+import flyLogo from "@/assets/logo.svg";
 
 const Footer = () => {
   return (
@@ -21,6 +23,18 @@ const Footer = () => {
               El secreto para salir adelante es comenzar.
             </p>
             <p className="text-sm opacity-60 mt-2">RUC: 20614688549</p>
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSd__Q-_V4guEBa652EbEDuPK2IIlc0bwBL3RLEUOQ7M8jZdag/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 block hover:opacity-80 transition-opacity w-fit"
+            >
+              <img
+                src={libroReclamaciones}
+                alt="Libro de Reclamaciones"
+                className="h-16 w-auto object-contain bg-white p-1 rounded shadow-sm"
+              />
+            </a>
           </div>
 
           {/* Quick Links */}
@@ -115,11 +129,30 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Legal */}
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-          <p className="text-sm opacity-60">
-            © {new Date().getFullYear()} NEGOCIACIONES ANKA E.I.R.L. Todos los derechos reservados.
-          </p>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-4 text-sm opacity-60">
+            <p>© {new Date().getFullYear()} NEGOCIACIONES ANKA E.I.R.L. </p>
+            <span className="hidden md:inline">|</span>
+            <Link to="/politica-privacidad" className="hover:opacity-100 transition-opacity">
+              Política de Privacidad
+            </Link>
+            <span className="hidden md:inline">|</span>
+            <Link to="/terminos-condiciones" className="hover:opacity-100 transition-opacity">
+              Términos y Condiciones
+            </Link>
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <span className="text-sm opacity-50">Desarrollado por</span>
+            <a
+              href="https://fly-software.lovable.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity"
+            >
+              <img src={flyLogo} alt="Fly Software" className="h-7 w-auto" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>

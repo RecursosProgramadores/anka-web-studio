@@ -8,6 +8,8 @@ import Nosotros from "./pages/Nosotros";
 import Productos from "./pages/Productos";
 import Contacto from "./pages/Contacto";
 import Checkout from "./pages/Checkout";
+import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
+import TerminosCondiciones from "./pages/TerminosCondiciones";
 import NotFound from "./pages/NotFound";
 
 import { CartProvider } from "@/context/CartContext";
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/productos" element={<Productos />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+            <Route path="/terminos-condiciones" element={<TerminosCondiciones />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

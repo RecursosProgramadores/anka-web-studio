@@ -10,10 +10,17 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  wholesalePrice?: number;
+  fakePrice?: number;
+  wholesalePrice?: number; // Keep for compatibility if needed
   category: string;
+  categoryId: string;
   image?: string;
   inStock: boolean;
+  variants?: {
+    id: string;
+    presentacion: string;
+    precio: number;
+  }[];
 }
 
 interface ProductCardProps {
@@ -95,17 +102,29 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           {/* Prices */}
           <div className="flex flex-col gap-1 mb-4">
             <div className="flex items-baseline gap-2">
-              <span className="text-xs text-muted-foreground">Menor:</span>
               <span className="text-lg font-bold text-foreground">
                 {formatPrice(product.price)}
               </span>
-            </div>
-            {product.wholesalePrice && (
-              <div className="flex items-baseline gap-2">
-                <span className="text-xs text-muted-foreground">Mayor:</span>
-                <span className="text-md font-semibold text-primary">
-                  {formatPrice(product.wholesalePrice)}
+              {product.fakePrice && product.fakePrice > product.price && (
+                <span className="text-sm text-muted-foreground line-through opacity-70">
+                  {formatPrice(product.fakePrice)}
                 </span>
+              )}
+            </div>
+
+            {/* Variants */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mt-2 space-y-1">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
+                  Presentaciones:
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {product.variants.map((v) => (
+                    <Badge key={v.id} variant="outline" className="text-[10px] font-medium py-0 px-1.5 h-5 border-primary/20 bg-primary/5 text-primary">
+                      {v.presentacion}: {formatPrice(v.precio)}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
           </div>

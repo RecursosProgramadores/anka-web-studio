@@ -4,21 +4,18 @@ import { ShoppingBag, CreditCard, ChevronRight, Tag } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
+import { Category } from "@/hooks/useProducts";
 
 interface ProductFiltersProps {
-  categories: string[];
+  categories: Category[];
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
-  priceFilter: "all" | "retail" | "wholesale";
-  onPriceFilterChange: (filter: "all" | "retail" | "wholesale") => void;
 }
 
 const ProductFilters = ({
   categories,
   selectedCategory,
   onCategoryChange,
-  priceFilter,
-  onPriceFilterChange,
 }: ProductFiltersProps) => {
   const { totalPrice, totalItems } = useCart();
   const navigate = useNavigate();
@@ -65,7 +62,7 @@ const ProductFilters = ({
 
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
         {/* Categories */}
-        <div className="mb-8">
+        <div>
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">
             Categorías
           </h3>
@@ -82,53 +79,17 @@ const ProductFilters = ({
             </button>
             {categories.map((category) => (
               <button
-                key={category}
-                onClick={() => onCategoryChange(category)}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold capitalize transition-all ${selectedCategory === category
+                key={category.id}
+                onClick={() => onCategoryChange(category.nombre)}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold capitalize transition-all ${selectedCategory === category.nombre
                   ? "bg-primary/10 text-primary border-r-4 border-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   }`}
               >
-                <span>{category}</span>
-                {selectedCategory === category && <ChevronRight className="w-4 h-4" />}
+                <span>{category.nombre}</span>
+                {selectedCategory === category.nombre && <ChevronRight className="w-4 h-4" />}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* Price Type Filter */}
-        <div>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">
-            Tipo de Venta
-          </h3>
-          <div className="grid grid-cols-1 gap-2">
-            <Button
-              variant={priceFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onPriceFilterChange("all")}
-              className={`justify-start h-10 font-bold ${priceFilter === "all" ? "shadow-md shadow-primary/20" : ""}`}
-            >
-              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
-              Ver Todos
-            </Button>
-            <Button
-              variant={priceFilter === "retail" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onPriceFilterChange("retail")}
-              className={`justify-start h-10 font-bold ${priceFilter === "retail" ? "shadow-md shadow-primary/20" : ""}`}
-            >
-              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
-              Precio al Menor
-            </Button>
-            <Button
-              variant={priceFilter === "wholesale" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onPriceFilterChange("wholesale")}
-              className={`justify-start h-10 font-bold ${priceFilter === "wholesale" ? "shadow-md shadow-primary/20" : ""}`}
-            >
-              <CreditCard className="w-4 h-4 mr-2 opacity-60" />
-              Precio al Mayor
-            </Button>
           </div>
         </div>
       </div>

@@ -38,6 +38,7 @@ const Checkout = () => {
         phone: "",
         city: ""
     });
+    const [shippingType, setShippingType] = useState<"lima" | "provincia">("lima");
 
     useEffect(() => {
         const fetchMethods = async () => {
@@ -92,11 +93,23 @@ const Checkout = () => {
 
         message += `🛍️ *Detalle del Pedido:*\n`;
         items.forEach(item => {
-            const priceType = item.selectedPriceType === "retail" ? "Menor" : "Mayor";
-            message += `• ${item.name} (${item.quantity}u) - Venta al ${priceType}: ${formatPrice(item.selectedPrice * item.quantity)}\n`;
+            message += `• ${item.name} (${item.quantity}u) - ${item.selectedPresentation}: ${formatPrice(item.selectedPrice * item.quantity)}\n`;
         });
 
-        message += `\n💰 *Total a invertir:* ${formatPrice(totalPrice)}\n`;
+        message += `\n💰 *Total Productos:* ${formatPrice(totalPrice)}\n`;
+
+        if (totalPrice >= 1500) {
+            if (shippingType === "lima") {
+                message += `🚚 *Envío:* GRATIS (Lima - Puerta a Puerta)\n`;
+            } else {
+                message += `🚚 *Envío:* GRATIS hasta Agencia (Lima - Provincias)\n`;
+                message += `⚠️ _Nota: El flete de agencia a destino es pago a destino._\n`;
+            }
+        } else {
+            message += `🚚 *Envío:* Por coordinar (Costo asumido por cliente)\n`;
+        }
+
+        message += `\n💵 *Total a invertir:* ${formatPrice(totalPrice)}\n`;
         message += `💳 *Método de Pago:* ${selectedMethod.nombre_banco}\n\n`;
         message += `_Hola, acabo de realizar mi pedido en la web de ANKA. Quedo atento a la confirmación final._`;
 
@@ -218,6 +231,64 @@ const Checkout = () => {
                                         />
                                     </div>
                                 </div>
+
+                                <Separator className="my-6 opacity-40" />
+
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-black uppercase tracking-tight">Tipo de Envío</h3>
+                                    <RadioGroup
+                                        value={shippingType}
+                                        onValueChange={(v: "lima" | "provincia") => setShippingType(v)}
+                                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                                    >
+                                        <div>
+                                            <RadioGroupItem value="lima" id="envio-lima" className="peer sr-only" />
+                                            <Label
+                                                htmlFor="envio-lima"
+                                                className="flex flex-col p-4 rounded-2xl border-2 border-muted bg-popover hover:bg-accent peer-data-[state=checked]:border-primary transition-all cursor-pointer h-full"
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-black uppercase">Lima Metropolitana</span>
+                                                    {shippingType === "lima" && <Truck className="w-4 h-4 text-primary" />}
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">
+                                                    Envío directo a tu domicilio o local comercial.
+                                                </p>
+                                            </Label>
+                                        </div>
+                                        <div>
+                                            <RadioGroupItem value="provincia" id="envio-provincia" className="peer sr-only" />
+                                            <Label
+                                                htmlFor="envio-provincia"
+                                                className="flex flex-col p-4 rounded-2xl border-2 border-muted bg-popover hover:bg-accent peer-data-[state=checked]:border-primary transition-all cursor-pointer h-full"
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-black uppercase">Provincias</span>
+                                                    {shippingType === "provincia" && <ShoppingBag className="w-4 h-4 text-primary" />}
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">
+                                                    Llevamos tu mercadería hasta la agencia de envío en Lima.
+                                                </p>
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
+
+                                    <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                                        <div className="flex gap-3">
+                                            <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
+                                            <div className="space-y-1">
+                                                <p className="text-xs font-bold text-blue-900 uppercase tracking-tight">Regla de Envío ANKA</p>
+                                                <p className="text-[10px] text-blue-800 leading-relaxed font-medium">
+                                                    {totalPrice >= 1500
+                                                        ? (shippingType === "lima"
+                                                            ? "¡Felicidades! Tu envío a Lima es GRATIS por superar los S/ 1,500."
+                                                            : "¡Felicidades! El envío hasta la agencia en Lima es GRATIS por superar los S/ 1,500. El flete posterior se paga en destino.")
+                                                        : "Los costos de envío se coordinarán por WhatsApp. Para envíos GRATIS, tu pedido debe superar los S/ 1,500."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </section>
 
                             {/* Step 2: Payment */}
@@ -318,7 +389,7 @@ const Checkout = () => {
                                             <ScrollArea className="max-h-[300px] pr-4 -mr-4">
                                                 <div className="space-y-6">
                                                     {items.map((item) => (
-                                                        <div key={`${item.id}-${item.selectedPriceType}`} className="flex gap-4">
+                                                        <div key={`${item.id}-${item.selectedPresentation}`} className="flex gap-4">
                                                             <div className="w-16 h-16 bg-muted rounded-xl overflow-hidden flex-shrink-0">
                                                                 {item.image ? (
                                                                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -330,6 +401,7 @@ const Checkout = () => {
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <h4 className="text-sm font-black truncate">{item.name}</h4>
+                                                                <p className="text-[9px] font-bold text-primary uppercase">{item.selectedPresentation}</p>
                                                                 <div className="flex items-center justify-between mt-1">
                                                                     <p className="text-[10px] text-muted-foreground font-bold">
                                                                         {item.quantity} x {formatPrice(item.selectedPrice)}
@@ -346,15 +418,24 @@ const Checkout = () => {
 
                                             <Separator className="my-8" />
 
-                                            <div className="space-y-4 font-bold">
+                                            <div className="space-y-3 font-bold">
                                                 <div className="flex justify-between text-sm tracking-tight text-muted-foreground">
                                                     <span>Subtotal</span>
                                                     <span>{formatPrice(totalPrice)}</span>
                                                 </div>
-                                                <div className="flex justify-between text-sm tracking-tight text-green-600">
-                                                    <span>Envío Estimado</span>
-                                                    <span>GRATIS</span>
+                                                <div className="flex justify-between text-[11px] tracking-tight text-blue-600 uppercase font-black">
+                                                    <span>Costo de Envío</span>
+                                                    <span className="text-right">
+                                                        {totalPrice >= 1500
+                                                            ? (shippingType === "lima" ? "GRATIS" : "GRATIS HASTA AGENCIA")
+                                                            : "POR COORDINAR"}
+                                                    </span>
                                                 </div>
+                                                {totalPrice >= 1500 && shippingType === "provincia" && (
+                                                    <p className="text-[8px] text-muted-foreground italic text-right -mt-2">
+                                                        * El flete de agencia a destino se paga en la agencia.
+                                                    </p>
+                                                )}
                                                 <Separator className="my-2" />
                                                 <div className="flex justify-between text-2xl tracking-tighter font-black">
                                                     <span>Total</span>
