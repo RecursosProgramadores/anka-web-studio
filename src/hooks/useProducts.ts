@@ -29,13 +29,10 @@ export const useProducts = () => {
           name: p.nombre,
           description: p.descripcion || "",
           price: p.precio,
-          fakePrice: p.precio_falso || undefined,
-          wholesalePrice: p.precio_falso || undefined, // Keep for backward compat
-          category: p.categoria?.nombre || "General",
-          categoryId: p.categoria_id,
           image: p.imagenes_relacionadas.length > 0
             ? p.imagenes_relacionadas[0].url
             : "https://via.placeholder.com/300x300?text=Sin+Imagen",
+          category: p.categoria?.nombre || "General",
           inStock: p.estado,
           variants: p.variantes,
         }));

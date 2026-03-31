@@ -43,13 +43,13 @@ const Productos = () => {
   return (
     <Layout>
       {/* Header */}
-      <section className="bg-primary py-20">
+      <section className="bg-primary py-12 md:py-20">
         <div className="container mx-auto px-4 text-center text-primary-foreground">
           <FadeIn>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Nuestros Productos</h1>
+            <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4">Nuestros Productos</h1>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="text-lg opacity-90 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg opacity-90 max-w-2xl mx-auto px-4">
               Explora nuestra variedad de productos importados y nacionales
               disponibles al por mayor y menor.
             </p>
@@ -63,74 +63,57 @@ const Productos = () => {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Sidebar Filters */}
             <aside className="lg:col-span-1">
-              <SlideIn direction="left">
-                <div className="sticky top-24">
-                  {/* Search */}
-                  <div className="mb-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Buscar productos..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+              <div className="sticky top-24">
+                <div className="mb-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar productos..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-
-                  <ProductFilters
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={handleCategoryChange}
-                  />
                 </div>
-              </SlideIn>
+                <ProductFilters
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={handleCategoryChange}
+                />
+              </div>
             </aside>
 
             {/* Products Grid */}
             <div className="lg:col-span-3">
               {isLoading ? (
-                <FadeIn>
-                  <div className="flex flex-col items-center justify-center py-20 bg-card rounded-2xl border border-dashed">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                    <span className="text-muted-foreground font-medium text-lg">Cargando catálogo...</span>
-                  </div>
-                </FadeIn>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+                  <span className="text-muted-foreground font-medium text-lg">Cargando catálogo...</span>
+                </div>
               ) : error ? (
-                <FadeIn>
-                  <div className="text-center py-20 bg-card rounded-2xl border border-destructive/20 text-destructive">
-                    <p className="font-bold text-xl mb-2">Oops!</p>
-                    <p>{error}</p>
-                  </div>
-                </FadeIn>
+                <div className="text-center py-20 text-destructive">
+                  <p className="font-bold text-xl mb-2">Oops!</p>
+                  <p>{error}</p>
+                </div>
               ) : filteredProducts.length === 0 ? (
-                <FadeIn>
-                  <div className="text-center py-20 bg-card rounded-2xl border border-dashed">
-                    <p className="text-muted-foreground text-lg">
-                      No se encontraron productos que coincidan con tu búsqueda.
-                    </p>
-                  </div>
-                </FadeIn>
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">
+                    No se encontraron productos que coincidan con tu búsqueda.
+                  </p>
+                </div>
               ) : (
                 <>
-                  <FadeIn>
-                    <div className="flex items-center justify-between mb-6">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Mostrando <span className="text-foreground font-bold">{filteredProducts.length}</span> producto(s)
-                      </p>
-                    </div>
-                  </FadeIn>
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Mostrando <span className="font-bold">{filteredProducts.length}</span> producto(s)
+                    </p>
+                  </div>
 
-                  <motion.div
-                    layout
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {filteredProducts.map((product, index) => (
-                        <ProductCard key={product.id} product={product} index={index} />
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredProducts.map((product, index) => (
+                      <ProductCard key={product.id} product={product} index={index} />
+                    ))}
+                  </div>
                 </>
               )}
             </div>

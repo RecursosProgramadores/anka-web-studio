@@ -1,210 +1,233 @@
 import { useState } from "react";
 import {
-    Dialog,
-    DialogContent,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Check, Minus, Plus, Tag, ShieldCheck, Truck } from "lucide-react";
+import { ShoppingCart, Check, Minus, Plus } from "lucide-react";
 import { Product } from "./ProductCard";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import { Separator } from "@/components/ui/separator";
 
 interface ProductDetailProps {
-    product: Product;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
+  product: Product;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const ProductDetail = ({ product, open, onOpenChange }: ProductDetailProps) => {
-    // Create a normalized list of variants that includes the base price as "Unidad" if it's not already there
-    const allVariants = [
-        { id: "base", presentacion: "Unidad", precio: product.price },
-        ...(product.variants || [])
-    ].filter((v, i, self) =>
-        i === self.findIndex((t) => t.presentacion.toLowerCase() === v.presentacion.toLowerCase())
-    );
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedPresentation, setSelectedPresentation] = useState(
+    product.variants && product.variants.length > 0
+      ? product.variants[0].presentacion
+      : "Unidad"
+  );
+  
+  const currentPrice = product.variants && product.variants.length > 0
+    ? product.variants.find(v => v.presentacion === selectedPresentation)?.precio || product.price
+    : product.price;
 
-    const [selectedVariant, setSelectedVariant] = useState(allVariants[0]);
-    const [quantity, setQuantity] = useState(1);
-    const { addToCart } = useCart();
+  const handleAddToCart = () => {
+    addToCart(product, quantity, selectedPresentation, currentPrice);
+    toast.success("Producto añadido al carrito", {
+      description: `${quantity} x ${product.name} (${selectedPresentation})`,
+    });
+    onOpenChange(false);
+  };
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat("es-PE", {
-            style: "currency",
-            currency: "PEN",
-        }).format(price);
-    };
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("es-PE", {
+      style: "currency",
+      currency: "PEN",
+    }).format(price);
+  };
 
-    const handleAddToCart = () => {
-        addToCart(product, quantity, selectedVariant.presentacion, selectedVariant.precio);
-        toast.success(`Producto añadido`, {
-            description: `${product.name} - ${selectedVariant.presentacion} (${quantity} uni.)`,
-            icon: <ShoppingCart className="w-4 h-4 text-primary" />,
-        });
-        onOpenChange(false);
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none shadow-2xl bg-background rounded-2xl">
-                <div className="flex flex-col md:flex-row h-full max-h-[90vh] md:max-h-[550px]">
-                    {/* Left side: Image & Features */}
-                    <div className="w-full md:w-[42%] bg-muted/20 relative flex flex-col border-r border-border/40">
-                        <div className="flex-1 relative group overflow-hidden">
-                            {product.image ? (
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground/10 bg-muted/30">
-                                    <ShoppingCart className="w-24 h-24" />
-                                </div>
-                            )}
-
-                            <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">
-                                <Badge variant="secondary" className="bg-background/90 hover:bg-background/90 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border-none shadow-sm text-foreground">
-                                    {product.category}
-                                </Badge>
-                                {product.fakePrice && product.fakePrice > selectedVariant.precio && (
-                                    <Badge className="bg-green-500 hover:bg-green-500 text-white border-none shadow-sm text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
-                                        Oferta
-                                    </Badge>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Trust Badges */}
-                        <div className="p-5 bg-background/40 backdrop-blur-sm border-t border-border/40 hidden md:block">
-                            <div className="space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <p className="text-[10px] font-bold text-foreground uppercase tracking-tight">Calidad Garantizada</p>
-                                        <p className="text-[9px] text-muted-foreground leading-tight">Control de calidad riguroso en cada producto.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Truck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <p className="text-[10px] font-bold text-foreground uppercase tracking-tight">Despacho Rápido</p>
-                                        <p className="text-[9px] text-muted-foreground leading-tight">Envíos a todo el territorio nacional.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right side: Product Info & Actions */}
-                    <div className="w-full md:w-[58%] flex flex-col p-6 md:p-8 bg-background overflow-y-auto">
-                        <div className="flex-1 flex flex-col gap-6">
-                            <div className="space-y-2">
-                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground leading-tight">
-                                    {product.name}
-                                </h2>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-black text-primary">
-                                        {formatPrice(selectedVariant.precio)}
-                                    </span>
-                                    {/* Mostrar precio tachado solo si se selecciona la unidad base y existe un precio_falso mayor */}
-                                    {selectedVariant.presentacion.toLowerCase() === "unidad" && product.fakePrice && product.fakePrice > selectedVariant.precio && (
-                                        <span className="text-sm text-muted-foreground line-through opacity-70">
-                                            {formatPrice(product.fakePrice)}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-medium line-clamp-3">
-                                    {product.description || "Este producto es parte de nuestra selecta línea de importaciones. Calidad y durabilidad garantizada para potenciar tu negocio."}
-                                </p>
-                            </div>
-
-                            <Separator className="opacity-60" />
-
-                            {/* Selection Logic */}
-                            <div className="space-y-4">
-                                <h4 className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">Selecciona presentación</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {allVariants.map((variant) => (
-                                        <button
-                                            key={variant.id}
-                                            onClick={() => setSelectedVariant(variant)}
-                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all duration-200 text-left relative overflow-hidden ${selectedVariant.id === variant.id
-                                                ? "border-primary bg-primary/5 shadow-sm"
-                                                : "border-border hover:border-primary/20 hover:bg-accent/5"
-                                                }`}
-                                        >
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-[9px] font-bold uppercase opacity-60 tracking-wider">
-                                                    {variant.presentacion}
-                                                </span>
-                                                {selectedVariant.id === variant.id && <Check className="w-3 h-3 text-primary stroke-[3]" />}
-                                            </div>
-                                            <span className="text-lg font-bold tracking-tight">{formatPrice(variant.precio)}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Quantity & Summary */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-muted/10 p-4 rounded-2xl border border-border/30">
-                                <div className="space-y-2 w-full sm:w-auto">
-                                    <h4 className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Cantidad</h4>
-                                    <div className="flex items-center justify-between bg-background p-1 rounded-lg border border-border/50 w-full sm:w-32">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 rounded hover:bg-muted active:scale-95"
-                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        >
-                                            <Minus className="w-3 h-3" />
-                                        </Button>
-                                        <span className="font-bold text-base tabular-nums">{quantity}</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 rounded hover:bg-muted active:scale-95"
-                                            onClick={() => setQuantity(quantity + 1)}
-                                        >
-                                            <Plus className="w-3 h-3" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div className="text-right flex flex-col justify-center sm:border-l border-border/20 sm:pl-6 w-full sm:w-auto">
-                                    <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Total Estimado</p>
-                                    <p className="text-2xl font-bold text-primary tracking-tight">
-                                        {formatPrice(selectedVariant.precio * quantity)}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Action Area */}
-                        <div className="pt-6 mt-auto flex flex-col gap-3">
-                            <Button
-                                className="w-full h-12 text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:-translate-y-0.5 transition-all group rounded-xl"
-                                onClick={handleAddToCart}
-                                disabled={!product.inStock}
-                            >
-                                <ShoppingCart className="w-4 h-4 mr-2 group-hover:rotate-6 transition-transform" />
-                                Añadir al Carrito
-                            </Button>
-                            <div className="flex items-center justify-center gap-3 opacity-30">
-                                <div className="h-[1px] flex-1 bg-muted-foreground/30" />
-                                <Tag className="w-2.5 h-2.5" />
-                                <p className="text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">
-                                    Importaciones ANKA
-                                </p>
-                                <div className="h-[1px] flex-1 bg-muted-foreground/30" />
-                            </div>
-                        </div>
-                    </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[95vw] md:max-w-7xl p-0 overflow-hidden sm:rounded-2xl border-none h-[95vh] sm:h-[85vh] flex flex-col">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
+          <div className="grid md:grid-cols-2 lg:grid-cols-[1.1fr,0.9fr] h-full">
+            {/* Image Section - Immersive Header on Mobile */}
+            <div className="relative bg-muted/30 h-[40vh] md:h-full flex items-center justify-center p-4 md:p-8">
+              {product.image ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-contain md:object-contain drop-shadow-xl"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
+                  <ShoppingCart className="w-24 h-24" />
                 </div>
-            </DialogContent>
-        </Dialog>
-    );
+              )}
+              <div className="absolute top-4 left-4 z-10">
+                <Badge className="capitalize text-xs md:text-sm py-1 px-4 shadow-lg backdrop-blur-md bg-primary/90 border-none">
+                  {product.category}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Details Section */}
+            <div className="p-6 md:p-12 flex flex-col bg-background">
+              <DialogHeader className="mb-8 space-y-4">
+                <div className="space-y-1">
+                  <DialogTitle className="text-2xl md:text-5xl font-black text-left leading-tight tracking-tight">
+                    {product.name}
+                  </DialogTitle>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-3xl md:text-5xl font-black text-primary tracking-tighter">
+                      {formatPrice(currentPrice)}
+                    </span>
+                  </div>
+                  {product.inStock ? (
+                    <Badge variant="outline" className="text-[10px] md:text-xs uppercase font-bold text-green-600 border-green-200 bg-green-50 gap-1 h-7">
+                      <Check className="w-3 h-3 md:w-4 md:h-4" /> En Stock
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="text-[10px] md:text-xs uppercase font-bold h-7">Agotado</Badge>
+                  )}
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-8 flex-1">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                    Descripción del Producto
+                  </h4>
+                  <p className="text-sm md:text-lg text-muted-foreground leading-relaxed font-medium">
+                    {product.description || "Este producto es parte de nuestra selecta línea de importaciones de alta calidad."}
+                  </p>
+                </div>
+
+                {product.variants && product.variants.length > 0 && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
+                    <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                      Opciones Disponibles
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {product.variants.map((variant) => (
+                        <button
+                          key={variant.id}
+                          onClick={() => setSelectedPresentation(variant.presentacion)}
+                          className={`flex flex-col p-4 rounded-2xl text-left transition-all border-2 ${
+                            selectedPresentation === variant.presentacion
+                              ? "border-primary bg-primary/5 shadow-md ring-1 ring-primary"
+                              : "border-border bg-card hover:border-primary/30"
+                          }`}
+                        >
+                          <span className={`text-[10px] md:text-xs font-bold mb-1 uppercase tracking-wider ${selectedPresentation === variant.presentacion ? "text-primary" : "text-muted-foreground"}`}>
+                            {variant.presentacion}
+                          </span>
+                          <span className="text-base md:text-xl font-black">{formatPrice(variant.precio)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Separator className="opacity-50" />
+
+                {/* desktop buy section - hidden on mobile buy bar is used instead */}
+                <div className="hidden md:flex flex-col gap-6 pt-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                      Cantidad
+                    </h4>
+                    <div className="flex items-center bg-muted/50 rounded-xl p-1.5 h-12">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-primary hover:bg-primary/10 rounded-lg"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        disabled={quantity <= 1}
+                      >
+                        <Minus className="w-5 h-5" />
+                      </Button>
+                      <span className="w-14 text-center font-black text-xl tabular-nums">
+                        {quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-primary hover:bg-primary/10 rounded-lg"
+                        onClick={() => setQuantity(quantity + 1)}
+                      >
+                        <Plus className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-muted-foreground font-bold text-lg">Total del Pedido:</span>
+                    <span className="text-4xl font-black text-primary tracking-tighter">
+                      {formatPrice(currentPrice * quantity)}
+                    </span>
+                  </div>
+                  
+                  <Button 
+                    className="w-full h-16 text-xl font-black gap-3 shadow-xl shadow-primary/20 hover:shadow-primary/30 transform hover:-translate-y-1 transition-all rounded-2xl"
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                  >
+                    <ShoppingCart className="w-6 h-6" />
+                    Proceder con la Compra
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Sticky Mobile Footer */}
+         <div className="md:hidden p-5 bg-background/80 backdrop-blur-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-30">
+            <div className="flex items-center justify-between gap-5">
+              <div className="flex items-center bg-muted/60 rounded-xl p-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-primary"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <span className="w-10 text-center font-bold text-lg tabular-nums">
+                  {quantity}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-primary"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <Button 
+                className="flex-1 h-14 text-base font-black gap-3 shadow-xl shadow-primary/25 rounded-2xl"
+                onClick={handleAddToCart}
+                disabled={!product.inStock}
+              >
+                <div className="flex flex-col items-start leading-none gap-0.5">
+                   <span className="text-[10px] opacity-70 font-bold uppercase tracking-widest text-white/90">Añadir</span>
+                   <span className="text-base text-white">{formatPrice(currentPrice * quantity)}</span>
+                </div>
+                <ShoppingCart className="w-5 h-5 ml-auto text-white/50" />
+              </Button>
+            </div>
+         </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default ProductDetail;

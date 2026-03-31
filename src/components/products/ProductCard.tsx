@@ -10,17 +10,10 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  fakePrice?: number;
-  wholesalePrice?: number; // Keep for compatibility if needed
-  category: string;
-  categoryId: string;
   image?: string;
+  category: string;
   inStock: boolean;
-  variants?: {
-    id: string;
-    presentacion: string;
-    precio: number;
-  }[];
+  variants?: any[];
 }
 
 interface ProductCardProps {
@@ -45,28 +38,24 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.1 }}
         whileHover={{ y: -5 }}
-        className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 border border-border group"
+        className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 border border-border group flex flex-col h-full"
       >
-        {/* Image */}
-        <div
-          className="aspect-square bg-muted relative overflow-hidden cursor-pointer"
+        <div 
+          className="aspect-square bg-muted/20 relative overflow-hidden cursor-pointer p-4 group"
           onClick={() => setShowDetail(true)}
         >
           {product.image ? (
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <span className="text-sm">Imagen del producto</span>
-              </div>
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/50">
+              <ShoppingCart className="w-12 h-12 opacity-50" />
             </div>
           )}
-
+          
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Button variant="secondary" size="sm" className="gap-2">
               <Eye className="w-4 h-4" />
@@ -74,12 +63,10 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </Button>
           </div>
 
-          {/* Category Badge */}
           <Badge className="absolute top-3 left-3 capitalize z-10">
             {product.category}
           </Badge>
-
-          {/* Stock Badge */}
+          
           {!product.inStock && (
             <Badge variant="destructive" className="absolute top-3 right-3 z-10">
               Agotado
@@ -87,64 +74,39 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          <h3
-            className="font-semibold text-card-foreground mb-1 line-clamp-1 cursor-pointer hover:text-primary transition-colors"
+        <div className="p-4 flex flex-col flex-1">
+          <h3 
+            className="font-bold text-card-foreground mb-1 line-clamp-1 cursor-pointer hover:text-primary transition-colors"
             onClick={() => setShowDetail(true)}
           >
             {product.name}
           </h3>
-          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+          <p className="line-clamp-2 text-muted-foreground text-sm mb-4 flex-1">
             {product.description}
           </p>
-
-          {/* Prices */}
-          <div className="flex flex-col gap-1 mb-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-foreground">
-                {formatPrice(product.price)}
-              </span>
-              {product.fakePrice && product.fakePrice > product.price && (
-                <span className="text-sm text-muted-foreground line-through opacity-70">
-                  {formatPrice(product.fakePrice)}
-                </span>
-              )}
-            </div>
-
-            {/* Variants */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="mt-2 space-y-1">
-                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
-                  Presentaciones:
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {product.variants.map((v) => (
-                    <Badge key={v.id} variant="outline" className="text-[10px] font-medium py-0 px-1.5 h-5 border-primary/20 bg-primary/5 text-primary">
-                      {v.presentacion}: {formatPrice(v.precio)}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+          
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-xl font-bold text-primary">
+              {formatPrice(product.price)}
+            </span>
+            <Button 
+              size="sm" 
+              className="gap-2"
+              variant={product.inStock ? "default" : "secondary"}
+              disabled={!product.inStock}
+              onClick={() => setShowDetail(true)}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Comprar
+            </Button>
           </div>
-
-          {/* Button */}
-          <Button
-            className="w-full gap-2"
-            disabled={!product.inStock}
-            onClick={() => setShowDetail(true)}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            Añadir al Carrito
-          </Button>
         </div>
       </motion.div>
 
-      <ProductDetail
-        product={product}
-        open={showDetail}
-        onOpenChange={setShowDetail}
+      <ProductDetail 
+        product={product} 
+        open={showDetail} 
+        onOpenChange={setShowDetail} 
       />
     </>
   );
